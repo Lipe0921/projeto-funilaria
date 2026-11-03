@@ -702,24 +702,125 @@ Cada decisão responde: **o que decidimos, por que, e qual regra ou necessidade 
 
 ---
 
-## 18. Conclusão
+## 18. Modelo lógico
 
-A modelagem organiza os principais dados e processos da Prime Funilaria, de clientes e veículos até o pagamento, passando por ordens de serviço, orçamentos, aprovação, estoque, serviços, peças e fornecedores. O DER foi construído a partir dos processos, requisitos e regras de negócio levantados, e cada entidade, atributo, relacionamento e cardinalidade tem justificativa ligada a uma regra. O modelo serve de base para as próximas etapas: modelo lógico, normalização, modelo físico e banco de dados.
+O modelo lógico transforma entidades, relacionamentos e cardinalidades em tabelas, chaves primárias (PK), chaves estrangeiras (FK) e restrições. Fio condutor: **regra de negócio → modelo lógico → restrição → DDL → teste**.
+
+![Modelo lógico](modelo_logico/modelo_logico.png)
+
+### 18.1 Regras de mapeamento do DER para o modelo lógico
+
+- Entidade → tabela; o identificador vira a chave primária (`INT AUTO_INCREMENT`).
+- Relacionamento 1:N → FK no lado N (`NOT NULL` quando a cardinalidade mínima do lado N é 1): `veiculo.id_cliente` (RN02), `ordem_servico.id_cliente`, `id_veiculo`, `id_funcionario` (RN23, RN04, RN06) e `item_orcamento.id_orcamento` (RN10).
+- Relacionamento 1:1 → FK no lado (1,1) com `UNIQUE`: `orcamento.id_os` (RN07, RN08) e `pagamento.id_orcamento` (RN14, RN15).
+- Relacionamento N:N → tabela associativa: `fornecedor_peca` com PK composta (`id_fornecedor`, `id_peca`) e os atributos `preco_compra` e `data_atualizacao` (RN16, RN17, RN18).
+- Exclusividade RN13 → duas FK opcionais em `item_orcamento` + `CHECK` que exige exatamente uma delas preenchida.
+- Atributos derivados (`valor_total`) não são armazenados: são calculados pelas visões `vw_item_orcamento` e `vw_orcamento_total`.
+- Domínios fechados (status, forma de pagamento) → `VARCHAR` + `CHECK ... IN (...)` (RN26, RN27, RN28).
+
+### 18.2 Classificação das entidades (forte, fraca e associativa)
+
+| Tabela | Classificação | Justificativa |
+|---|---|---|
+| CLIENTE, FUNCIONARIO, SERVICO, PECA, FORNECEDOR | Forte | Identificador próprio, existem sem depender de outra tabela. |
+| VEICULO, ORDEM_SERVICO, ORCAMENTO, PAGAMENTO | Forte (com FK) | Ter FK não torna a entidade fraca: a identidade não é composta pela chave de outra tabela. |
+| ITEM_ORCAMENTO | Fraca (dependência existencial) | Como a linha de um cupom fiscal, o item perde o sentido sem o orçamento (RN10). Mantém `id_item` como chave substituta (conveniência técnica); a dependência é imposta por `id_orcamento NOT NULL` + FK com `ON DELETE CASCADE`. |
+| FORNECEDOR_PECA | Associativa | Resolve o N:N entre FORNECEDOR e PECA, com PK composta e atributos próprios (RN18). |
+
+---
+
+## 19. Normalização
+
+Todas as tabelas foram verificadas até a 3FN.
+
+- **1FN:** atributos atômicos, sem grupos repetitivos (`endereco` de FORNECEDOR fica como texto único nesta etapa).
+- **2FN:** só `fornecedor_peca` tem PK composta, e `preco_compra` e `data_atualizacao` dependem do par inteiro (RN18). As demais têm PK simples.
+- **3FN:** sem dependências transitivas. `valor_total` não é armazenado. `ordem_servico.id_cliente` (solicitante) não é determinado por `id_veiculo`, pois o solicitante pode ser diferente do proprietário (RN23). `valor_unitario` é um fato do item, congelado por RN21.
+
+---
+
+## 20. Implementação em SQL e testes de integridade
+
+Scripts para MySQL 8.0.16+ (InnoDB), validados também em MariaDB 10.11. Todos os dados são fictícios. Execute na ordem:
+
+| Script | Conteúdo |
+|---|---|
+| [`sql/01_estrutura.sql`](sql/01_estrutura.sql) | Cria o banco `prime_funilaria`, as 11 tabelas, as restrições e as 2 visões. |
+| [`sql/02_carga_valida.sql`](sql/02_carga_valida.sql) | Insere 42 registros válidos (pais primeiro, depois dependentes). |
+| [`sql/03_testes_integridade.sql`](sql/03_testes_integridade.sql) | 15 tentativas inválidas, 3 UPDATE, 1 DELETE controlado e 4 SELECT. |
+
+### 20.1 Origem de cada restrição
+
+| Regra | Restrição no banco | Tabela |
+|---|---|---|
+| RN02, RN04, RN06, RN23 | FK `NOT NULL` | veiculo, ordem_servico |
+| RN07, RN08 | `UNIQUE` + `NOT NULL` + FK em `id_os` | orcamento |
+| RN10 | `NOT NULL` + FK com `ON DELETE CASCADE` | item_orcamento |
+| RN13 | `CHECK` de exclusividade serviço/peça | item_orcamento |
+| RN14, RN15 | `UNIQUE` + `NOT NULL` + FK em `id_orcamento` | pagamento |
+| RN16, RN17, RN18 | PK composta + duas FK | fornecedor_peca |
+| RN20 | `CHECK (ativo IN (0,1))` | servico, peca |
+| RN24 | `CHECK (quantidade > 0)` | item_orcamento |
+| RN25 | `CHECK (estoque >= 0)` | peca |
+| RN26 | `CHECK` da lista de status da OS | ordem_servico |
+| RN27 | `CHECK` do status e `validade >= data_orcamento` | orcamento |
+| RN28 | `CHECK` de forma e status do pagamento | pagamento |
+| RN29 | `UNIQUE` em cpf_cnpj, placa, chassi, cpf, cnpj | cliente, veiculo, funcionario, fornecedor |
+
+### 20.2 Tentativas inválidas (todas rejeitadas pelo SGBD)
+
+| Teste | Comando | Restrição violada | Regra protegida |
+|---|---|---|---|
+| T01 | INSERT cliente com `id_cliente` já existente | PK duplicada (erro 1062) | Identidade única do cliente |
+| T02 | INSERT veículo com `id_cliente = 9999` | FK (erro 1452) | RN02 |
+| T03 | INSERT cliente com CPF/CNPJ repetido | UNIQUE (erro 1062) | RN29 |
+| T04 | INSERT cliente com `nome` nulo | NOT NULL (erro 1048) | Nome obrigatório |
+| T05 | INSERT peça com estoque -5 | CHECK (erro 4025) | RN25 |
+| T06 | INSERT item com quantidade 0 | CHECK (erro 4025) | RN24 |
+| T07 | INSERT item com serviço **e** peça | CHECK de exclusividade | RN13 |
+| T08 | INSERT item sem serviço e sem peça | CHECK de exclusividade | RN13 |
+| T09 | Segundo orçamento para a mesma OS | UNIQUE em `id_os` | RN07 |
+| T10 | Segundo pagamento para o mesmo orçamento | UNIQUE em `id_orcamento` | RN14 |
+| T11 | Repetir o par fornecedor/peça | PK composta | RN16/RN17 |
+| T12 | UPDATE status da OS para `CANCELADA` | CHECK | RN26 |
+| T13 | Orçamento com validade anterior à data | CHECK | RN27 |
+| T14 | UPDATE baixando 10 de estoque com saldo 2 | CHECK | RN25/RN30 |
+| T15 | DELETE de cliente com veículos/OS | FK em DELETE (erro 1451) | RN02 |
+
+O comando completo, a mensagem real do SGBD e a correção de cada teste estão no relatório em PDF e em `sql/03_testes_integridade.sql`.
+
+### 20.3 Regras que não cabem em uma constraint simples
+
+RN27 (expiração e transições de status), RN30 (baixa de estoque na aprovação), RN31 (entrada de peças soma ao estoque), RN32 (pagamento só de orçamento aprovado e igual ao total) e as permissões por perfil (P01 a P03) dependem de mais de uma tabela, de sequência ou da data corrente. Ficam documentadas para tratamento na lógica da aplicação.
+
+---
+
+## 21. Conclusão
+
+A modelagem organiza os principais dados e processos da Prime Funilaria, de clientes e veículos até o pagamento, passando por ordens de serviço, orçamentos, aprovação, estoque, serviços, peças e fornecedores. O DER foi construído a partir dos processos, requisitos e regras de negócio levantados, e cada entidade, atributo, relacionamento e cardinalidade tem justificativa ligada a uma regra. O modelo conceitual foi transformado em modelo lógico, verificado até a 3FN e implementado em SQL, onde as restrições derivadas das regras de negócio foram testadas e rejeitaram corretamente os dados inválidos.
 
 ---
 
 ### Anexo — Estrutura do repositório
 
-```text
+```
 projeto-funilaria/
 ├── README.md
 ├── diagramas/
 │   └── DER.png
+├── modelo_logico/
+│   └── modelo_logico.png
+├── sql/
+│   ├── 01_estrutura.sql
+│   ├── 02_carga_valida.sql
+│   └── 03_testes_integridade.sql
 └── documentos/
     ├── dicionario_de_dados.pdf
     └── DIARIO DE BORDO_000205.pdf
 ```
 
 - [DER (imagem)](diagramas/DER.png)
+- [Modelo lógico (imagem)](modelo_logico/modelo_logico.png)
+- [Scripts SQL](sql/)
 - [Dicionário de dados conceitual (PDF)](documentos/dicionario_de_dados.pdf)
 - [Diário de bordo (PDF)](documentos/DIARIO%20DE%20BORDO_000205.pdf)
