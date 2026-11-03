@@ -21,7 +21,6 @@ Projeto Integrador de Modelagem de Dados: do problema real ao Modelo Conceitual 
 | Ruan Sousa Silva | 47347805 |
 | Vinicius de Oliveira | 47710608 |
 | Leonardo Augusto | 47733497 |
-| Leonardo (segundo integrante) | não informado |
 
 ---
 
