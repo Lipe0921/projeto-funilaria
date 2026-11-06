@@ -13,7 +13,7 @@ Projeto ERP — Prime Funilaria · Curso: Engenharia de Software · Disciplina: 
 | Vinicius de Oliveira | 47710608 |
 | Leonardo Augusto | 47733497 |
 
-> Versão revisada. Substitui o PDF `docs/dicionario_de_dados_conceitual_antigo.pdf`, que trazia a lista de integrantes com nomes divergentes e um integrante como "não informado". A fonte de verdade é a seção 15 do README.
+> Versão revisada. Substitui a versão anterior em PDF (removida; disponível no histórico do git), que trazia a lista de integrantes com nomes divergentes e um integrante como "não informado". A fonte de verdade é a seção 15 do README.
 
 ## Dicionário por entidade
 

@@ -465,7 +465,7 @@ O único N:N é Fornecedor — Peça, resolvido por **FORNECEDOR_PECA**:
 
 ## 15. Dicionário de dados conceitual
 
-Versão em arquivo: [`docs/dicionario_de_dados_conceitual.md`](docs/dicionario_de_dados_conceitual.md) (PDF: [`docs/dicionario_de_dados_conceitual.pdf`](docs/dicionario_de_dados_conceitual.pdf)). O dicionário do **modelo implementado** (tipos, PK, FK, NULL, UNIQUE, DEFAULT e constraints) está em [`docs/dicionario_de_dados_implementado.md`](docs/dicionario_de_dados_implementado.md) (PDF: [`docs/dicionario_de_dados_implementado.pdf`](docs/dicionario_de_dados_implementado.pdf)), gerado a partir do próprio banco.
+Versão em arquivo: [`docs/dicionario_de_dados_conceitual.md`](docs/dicionario_de_dados_conceitual.md) (PDF: [`docs/dicionario_de_dados_conceitual.pdf`](docs/dicionario_de_dados_conceitual.pdf)). A versão anterior em PDF, com nomes divergentes, foi removida e permanece no histórico do git.. O dicionário do **modelo implementado** (tipos, PK, FK, NULL, UNIQUE, DEFAULT e constraints) está em [`docs/dicionario_de_dados_implementado.md`](docs/dicionario_de_dados_implementado.md) (PDF: [`docs/dicionario_de_dados_implementado.pdf`](docs/dicionario_de_dados_implementado.pdf)), gerado a partir do próprio banco.
 
 Para cada entidade, os atributos são descritos (que dado é e para que serve), classificados e associados às regras de negócio. Classificação: **identificador**, **obrigatório**, **opcional** e **derivado**. Como o modelo é conceitual, os tipos de dados e as chaves estrangeiras serão definidos nas próximas etapas (modelo lógico e físico); aqui os vínculos entre entidades aparecem na linha **Relacionamentos** de cada entidade e na seção 14.
 
@@ -910,7 +910,7 @@ projeto-funilaria/
 │   ├── dicionario_de_dados_implementado.md
 │   ├── dicionario_de_dados_implementado.pdf
 │   ├── evidencias_testes.md
-│   ├── dicionario_de_dados_conceitual_antigo.pdf   (versão anterior, mantida para histórico)
+│   ├── uso_de_ia.md
 │   └── diario_de_bordo.pdf
 └── sql/
     ├── executar_tudo.sh
@@ -927,7 +927,7 @@ projeto-funilaria/
 - [Scripts SQL](sql/)
 - [Normalização](docs/normalizacao.md) · [Revisão da primeira entrega](docs/revisao_primeira_entrega.md)
 - [Dicionário de dados conceitual](docs/dicionario_de_dados_conceitual.md) · [Dicionário do modelo implementado](docs/dicionario_de_dados_implementado.md)
-- [Evidências dos testes](docs/evidencias_testes.md)
+- [Evidências dos testes](docs/evidencias_testes.md) · [Uso de IA](docs/uso_de_ia.md)
 - [Diário de bordo (PDF)](docs/diario_de_bordo.pdf)
 
 ### Como reproduzir
