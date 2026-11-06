@@ -8,6 +8,10 @@ O DER (`diagramas/DER.png`) foi revisado com a pergunta da etapa 1: "Nosso DER a
 
 Resultado: **as entidades, os relacionamentos e as cardinalidades foram mantidos**. O modelo conceitual já representava corretamente o negócio. As mudanças foram de **implementação**, documentadas abaixo, e não de decisão de modelagem.
 
+### Atualização do DER (decisão registrada)
+
+O DER conceitual foi conferido com o método "vá e volte" para cardinalidades (sugestão registrada no diário de bordo da aula), com a verificação de N:N e com a pergunta da etapa 1 do manual. O resultado foi: **nenhuma alteração no diagrama**, porque as decisões da revisão são de implementação (derivados, domínios, constraints) e já estão representadas no DER: o relacionamento N:N como entidade associativa, a exclusividade serviço/peça como linha vermelha, e os atributos derivados em marrom. O DER atualizado é o mesmo arquivo `diagramas/DER.png`.
+
 ## 2. Alterações principais (como era × como ficou)
 
 | O que foi alterado | Como era (conceitual) | Como ficou (lógico/físico) | Por que alteramos | Regra |
