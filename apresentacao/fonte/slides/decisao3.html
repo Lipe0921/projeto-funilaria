@@ -1,0 +1,25 @@
+<section id="decisao3" data-transition="fade" style="background:#FBFBF8;color:#14213D;font-family:'Inter', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:40px">
+<p style="font-size:28px;font-weight:600;color:#B5520F;text-transform:uppercase;letter-spacing:3px">Decisão 3 · normalização</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.1">O valor total do orçamento não é armazenado</h2>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#F1EFE9;padding:40px;border:1px solid #D9D5CB;border-radius:16px">
+<h3 style="font-size:34px;font-weight:600;color:#B5520F">Se armazenássemos</h3>
+<p style="font-size:30px;line-height:1.4">Alterar um item sem recalcular o orçamento deixaria o total errado.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#F1EFE9;padding:40px;border:1px solid #D9D5CB;border-radius:16px">
+<h3 style="font-size:34px;font-weight:600;color:#B5520F">O que fizemos</h3>
+<p style="font-size:30px;line-height:1.4">Calculamos na consulta, pela visão vw_orcamento_total. O valor é sempre consistente com os itens.</p>
+</div>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<h3 style="width:330px;font-size:32px;font-weight:600;color:#B5520F">Por que</h3>
+<p style="font-size:34px;line-height:1.35">Evita redundância e mantém o modelo na 3FN. O valor do item é congelado (RN21), então o cálculo não muda depois de emitido.</p>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<h3 style="width:330px;font-size:32px;font-weight:600;color:#B5520F">E se precisasse guardar?</h3>
+<p style="font-size:34px;line-height:1.35">Por desempenho, a aplicação passaria a atualizar o total a cada alteração do item.</p>
+</div>
+</div>
+<aside>Defender (até o fim do tempo de defesa). Mostrar que a decisão é de normalização e não de gosto. Ver docs/normalizacao.md, caso 2, e a seção 19 do README. Se perguntarem por que o item tem valor_unitario e não o valor do serviço, ver o caso 5: o preço cobrado é um fato histórico do item.</aside>
+</section>
