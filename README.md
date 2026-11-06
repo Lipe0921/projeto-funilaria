@@ -92,6 +92,22 @@ Para a modelagem de dados, o negócio permite aplicar:
 
 ---
 
+### 4.1 Solução proposta
+
+Um ERP que integra, em uma única base de dados, os módulos que hoje funcionam em papel:
+
+| Módulo | O que resolve | Entidades principais |
+|---|---|---|
+| Atendimento | Cadastro único de clientes e veículos e histórico por veículo | CLIENTE, VEICULO, FUNCIONARIO, ORDEM_SERVICO |
+| Orçamentação | Orçamento por OS, com itens de serviço ou peça e validade controlada | ORCAMENTO, ITEM_ORCAMENTO, SERVICO |
+| Estoque e fornecedores | Controle de quantidade, baixa na aprovação, entrada no recebimento e comparação de preços de compra | PECA, FORNECEDOR, FORNECEDOR_PECA |
+| Financeiro | Pagamento vinculado a um orçamento aprovado | PAGAMENTO |
+| Consultas e auditoria | Indicadores para gestão e verificação de consistência dos dados | Visões e consultas (`sql/consultas/`) |
+
+A cadeia **problema → requisitos → solução** é: cada problema da seção 4 corresponde a requisitos funcionais (seção 6), que são atendidos pelas entidades e regras acima.
+
+---
+
 ## 5. Processos de negócio
 
 | Processo | Quem participa | O que inicia | O que acontece | Informação gerada | Resultado |
@@ -449,6 +465,8 @@ O único N:N é Fornecedor — Peça, resolvido por **FORNECEDOR_PECA**:
 
 ## 15. Dicionário de dados conceitual
 
+Versão em arquivo: [`docs/dicionario_de_dados_conceitual.md`](docs/dicionario_de_dados_conceitual.md) (PDF: [`docs/dicionario_de_dados_conceitual.pdf`](docs/dicionario_de_dados_conceitual.pdf)). O dicionário do **modelo implementado** (tipos, PK, FK, NULL, UNIQUE, DEFAULT e constraints) está em [`docs/dicionario_de_dados_implementado.md`](docs/dicionario_de_dados_implementado.md) (PDF: [`docs/dicionario_de_dados_implementado.pdf`](docs/dicionario_de_dados_implementado.pdf)), gerado a partir do próprio banco.
+
 Para cada entidade, os atributos são descritos (que dado é e para que serve), classificados e associados às regras de negócio. Classificação: **identificador**, **obrigatório**, **opcional** e **derivado**. Como o modelo é conceitual, os tipos de dados e as chaves estrangeiras serão definidos nas próximas etapas (modelo lógico e físico); aqui os vínculos entre entidades aparecem na linha **Relacionamentos** de cada entidade e na seção 14.
 
 ### CLIENTE
@@ -730,23 +748,27 @@ O modelo lógico transforma entidades, relacionamentos e cardinalidades em tabel
 
 ## 19. Normalização
 
-Todas as tabelas foram verificadas até a 3FN.
+Todas as tabelas foram verificadas até a 3FN. A análise completa, com dependências funcionais por tabela e seis casos (duas decomposições aplicadas, quatro situações avaliadas e mantidas com justificativa), está em **[`docs/normalizacao.md`](docs/normalizacao.md)**.
 
-- **1FN:** atributos atômicos, sem grupos repetitivos (`endereco` de FORNECEDOR fica como texto único nesta etapa).
-- **2FN:** só `fornecedor_peca` tem PK composta, e `preco_compra` e `data_atualizacao` dependem do par inteiro (RN18). As demais têm PK simples.
-- **3FN:** sem dependências transitivas. `valor_total` não é armazenado. `ordem_servico.id_cliente` (solicitante) não é determinado por `id_veiculo`, pois o solicitante pode ser diferente do proprietário (RN23). `valor_unitario` é um fato do item, congelado por RN21.
+- **1FN:** atributos atômicos, sem grupos repetitivos. `endereco` de FORNECEDOR é mantido como texto único por decisão justificada (caso 4 do documento).
+- **2FN:** só `fornecedor_peca` tem PK composta, e `preco_compra` e `data_atualizacao` dependem do par inteiro (RN18). Na análise, fornecedor e peça foram separados para evitar dependências parciais (caso 1).
+- **3FN:** sem dependências transitivas. `valor_total` não é armazenado, e sim calculado pelas visões (caso 2). `ordem_servico.id_cliente` (solicitante) não é determinado por `id_veiculo`, pois o solicitante pode ser diferente do proprietário (RN23, caso 3). `valor_unitario` é um fato do item, congelado por RN21 (caso 5).
+
+A revisão do modelo conceitual da primeira entrega, com as alterações feitas ao chegar no modelo lógico, está em **[`docs/revisao_primeira_entrega.md`](docs/revisao_primeira_entrega.md)**.
 
 ---
 
 ## 20. Implementação em SQL e testes de integridade
 
-Scripts para MySQL 8.0.16+ (InnoDB), validados também em MariaDB 10.11. Todos os dados são fictícios. Execute na ordem:
+Scripts para MySQL 8.0.16+ (InnoDB). Testados nesta revisão em **MariaDB 10.11.14**; o teste em MySQL 8 não foi realizado. Todos os dados são fictícios. Para executar tudo de uma vez em um servidor vazio: `bash sql/executar_tudo.sh`. Ou, na ordem:
 
 | Script | Conteúdo |
 |---|---|
-| [`sql/01_estrutura.sql`](sql/01_estrutura.sql) | Cria o banco `prime_funilaria`, as 11 tabelas, as restrições e as 2 visões. |
-| [`sql/02_carga_valida.sql`](sql/02_carga_valida.sql) | Insere 42 registros válidos (pais primeiro, depois dependentes). |
-| [`sql/03_testes_integridade.sql`](sql/03_testes_integridade.sql) | 15 tentativas inválidas, 3 UPDATE, 1 DELETE controlado e 4 SELECT. |
+| [`sql/ddl/01_estrutura.sql`](sql/ddl/01_estrutura.sql) | Cria o banco `prime_funilaria`, as 11 tabelas, as restrições e as 2 visões. |
+| [`sql/dados/02_carga_valida.sql`](sql/dados/02_carga_valida.sql) | Insere 53 registros válidos fictícios (pais primeiro, depois dependentes). Ver seção 21. |
+| [`sql/testes/03_testes_integridade.sql`](sql/testes/03_testes_integridade.sql) | 15 tentativas inválidas (T01–T15, incluindo 2 UPDATE e 1 DELETE), 3 UPDATE válidos, 1 DELETE controlado e 4 SELECT. |
+| [`sql/consultas/04_consultas_gerenciais.sql`](sql/consultas/04_consultas_gerenciais.sql) | 9 consultas gerenciais (G1–G9), cada uma com pergunta de negócio e decisão apoiada. Ver seção 23. |
+| [`sql/consultas/05_consultas_auditoria.sql`](sql/consultas/05_consultas_auditoria.sql) | 10 consultas de auditoria (A1–A10), cada uma com o que verifica. Ver seção 24. |
 
 ### 20.1 Origem de cada restrição
 
@@ -786,7 +808,7 @@ Scripts para MySQL 8.0.16+ (InnoDB), validados também em MariaDB 10.11. Todos o
 | T14 | UPDATE baixando 10 de estoque com saldo 2 | CHECK | RN25/RN30 |
 | T15 | DELETE de cliente com veículos/OS | FK em DELETE (erro 1451) | RN02 |
 
-O comando completo, a mensagem real do SGBD e a correção de cada teste estão no relatório em PDF e em `sql/03_testes_integridade.sql`.
+Evidências de execução, com a mensagem real do MariaDB 10.11.14 para cada teste, estão em **[`docs/evidencias_testes.md`](docs/evidencias_testes.md)**.
 
 ### 20.3 Regras que não cabem em uma constraint simples
 
@@ -794,7 +816,78 @@ RN27 (expiração e transições de status), RN30 (baixa de estoque na aprovaç�
 
 ---
 
-## 21. Conclusão
+## 21. Massa de dados
+
+A massa de dados (`sql/dados/02_carga_valida.sql`) tem **53 registros fictícios e coerentes**, com todas as chaves estrangeiras válidas. Ela foi construída para testar cenários, e não só volume:
+
+| Cenário coberto | Onde aparece |
+|---|---|
+| Cliente com mais de um veículo | Cliente 1 (veículos 1 e 4) |
+| Cliente sem telefone | Cliente 4 |
+| Veículo sem cor ou ano (campos opcionais) | Veículo 3 |
+| Ordem com solicitante diferente do proprietário (RN23) | OS 4 |
+| Orçamentos nos três status | Aprovado (1, 4, 5), pendente (2), expirado (3) |
+| Itens de serviço e de peça | Orçamentos 1, 2 e 3 combinam serviço e peça; orçamentos 4 e 5 têm só serviços |
+| Peça sem estoque e peças com estoque baixo | Peça 3 (estoque 0); peças 2 e 4 (estoque 2 e 1) |
+| Peça com dois fornecedores e preços diferentes (RN18) | Peça 1 (AutoPecas Central e Distribuidora Sul) |
+| Campos opcionais vazios em fornecedor | Fornecedor 2 (sem endereço e e-mail) e fornecedor 3 (sem telefone) |
+| Serviço sem tempo padrão (campo opcional) | Serviço 3 |
+| Pagamentos por PIX, cartão e dinheiro (pendente) | Pagamentos 1, 2 e 3 |
+| Vendas em mais de um mês | Setembro e outubro de 2026 |
+
+Coerência verificada: o valor de cada pagamento confere com o total do orçamento (RN32): pagamento 1 = 2750 (orçamento 1), pagamento 2 = 1250 (orçamento 4), pagamento 3 = 1200 (orçamento 5).
+
+## 22. Consultas gerenciais
+
+Cada consulta responde a uma pergunta de negócio e apoia uma decisão. O arquivo completo está em [`sql/consultas/04_consultas_gerenciais.sql`](sql/consultas/04_consultas_gerenciais.sql).
+
+| Código | Pergunta do negócio | Decisão apoiada |
+|---|---|---|
+| G1 | Quais peças são mais vendidas? | Reorganizar estoque e compras |
+| G2 | Quais serviços são mais procurados? | Priorizar equipe e divulgação |
+| G3 | Quais clientes mais compram? | Fidelização e condições para recorrentes |
+| G4 | Qual o volume de vendas aprovadas por mês? | Planejar equipe e compras pela sazonalidade |
+| G5 | Quanto foi recebido, por forma de pagamento? | Avaliar meios de pagamento mais usados |
+| G6 | Quanto ainda falta receber de orçamentos aprovados? | Cobrança de saldos em aberto |
+| G7 | Quais peças ativas estão com estoque baixo ou zerado? | Acionar fornecedor antes de precisar aprovar orçamento (P05) |
+| G8 | Qual o andamento das OS por funcionário responsável? | Redistribuir carga de trabalho |
+| G9 | Qual fornecedor tem o menor preço de compra por peça? | Escolher o fornecedor de menor custo (RF26) |
+
+## 23. Consultas de auditoria
+
+Cada consulta verifica uma situação que merece conferência. **Resultado vazio significa que nenhuma situação suspeita foi encontrada.** O arquivo está em [`sql/consultas/05_consultas_auditoria.sql`](sql/consultas/05_consultas_auditoria.sql).
+
+| Código | O que verifica | Regra |
+|---|---|---|
+| A1 | OS abertas há mais de 7 dias sem orçamento | RN07, RN26 |
+| A2 | Orçamentos pendentes com validade vencida (deveriam estar expirados) | RN27 |
+| A3 | Orçamentos aprovados sem pagamento lançado | RN14 |
+| A4 | Pagamentos com valor diferente do total do orçamento | RN32 |
+| A5 | Pagamentos de orçamentos que não estão aprovados | RN14, RN32 |
+| A6 | Itens de orçamentos pendentes com serviço ou peça inativos | RN20, P07 |
+| A7 | Peças com estoque negativo (o CHECK deve impedir; a consulta confirma) | RN25 |
+| A8 | Preços de compra com mais de 180 dias sem atualização | RN18 |
+| A9 | Peças ativas sem fornecedor cadastrado | RN16, RN17 |
+| A10 | OS em que o solicitante é diferente do proprietário do veículo (para conferência) | RN23 |
+
+Ao executar após a carga e os testes, A3 retorna o orçamento 2 (aprovado pelo teste U1 e ainda sem pagamento), e A10 retorna a OS 4, caso previsto pela regra RN23. Os dois são situações reais do fluxo de teste, não erros de dados.
+
+## 24. Potencial para BI e IA
+
+**BI.** Pergunta: como as vendas evoluíram nos últimos meses? Dados: `orcamento` (data, status) + `item_orcamento` + `vw_orcamento_total`. Possibilidade: dashboard mensal de vendas aprovadas (consulta G4) e painel de saldos a receber (G6), que mostra quanto ainda não foi recebido.
+
+**IA.** Problema: prever a demanda de peças para antecipar compras. Dados possíveis: histórico de `item_orcamento` (peça e quantidade) agrupado por mês pela data do orçamento, mais o cadastro de peças e de fornecedores. Possibilidade futura: modelo de previsão de demanda por peça, com alerta de reposição antes de a peça faltar durante a aprovação de um orçamento (P05).
+
+**Limitação.** A massa atual é fictícia e pequena, com poucas vendas por peça. Ela serve para demonstrar as consultas e a viabilidade do modelo, mas não é suficiente para treinar uma previsão. A viabilidade da IA depende de um histórico real de vendas.
+
+## 25. Histórico e evolução do projeto
+
+O repositório tem 66 commits, de 6 de outubro a 3 de novembro de 2026. A autoria está distribuída: Lipe0921 (56 commits), Felipe Souza (8), Davi melo (1) e jonathannerydev (1). O histórico não foi reescrito, e os commits mostram a evolução do projeto:
+
+1. **Primeira entrega (outubro de 2026):** problema, requisitos, regras de negócio, DER conceitual e dicionário conceitual.
+2. **Entrega final (novembro de 2026):** revisão do modelo conceitual ([`docs/revisao_primeira_entrega.md`](docs/revisao_primeira_entrega.md)), modelo lógico, normalização ([`docs/normalizacao.md`](docs/normalizacao.md)), implementação em SQL com testes de integridade ([`docs/evidencias_testes.md`](docs/evidencias_testes.md)), consultas gerenciais e de auditoria, dicionário do modelo implementado e esta documentação.
+
+## 26. Conclusão
 
 A modelagem organiza os principais dados e processos da Prime Funilaria, de clientes e veículos até o pagamento, passando por ordens de serviço, orçamentos, aprovação, estoque, serviços, peças e fornecedores. O DER foi construído a partir dos processos, requisitos e regras de negócio levantados, e cada entidade, atributo, relacionamento e cardinalidade tem justificativa ligada a uma regra. O modelo conceitual foi transformado em modelo lógico, verificado até a 3FN e implementado em SQL, onde as restrições derivadas das regras de negócio foram testadas e rejeitaram corretamente os dados inválidos.
 
@@ -809,17 +902,39 @@ projeto-funilaria/
 │   └── DER.png
 ├── modelo_logico/
 │   └── modelo_logico.png
-├── sql/
-│   ├── 01_estrutura.sql
-│   ├── 02_carga_valida.sql
-│   └── 03_testes_integridade.sql
-└── documentos/
-    ├── dicionario_de_dados.pdf
-    └── DIARIO DE BORDO_000205.pdf
+├── docs/
+│   ├── normalizacao.md
+│   ├── revisao_primeira_entrega.md
+│   ├── dicionario_de_dados_conceitual.md
+│   ├── dicionario_de_dados_conceitual.pdf
+│   ├── dicionario_de_dados_implementado.md
+│   ├── dicionario_de_dados_implementado.pdf
+│   ├── evidencias_testes.md
+│   ├── dicionario_de_dados_conceitual_antigo.pdf   (versão anterior, mantida para histórico)
+│   └── diario_de_bordo.pdf
+└── sql/
+    ├── executar_tudo.sh
+    ├── ddl/01_estrutura.sql
+    ├── dados/02_carga_valida.sql
+    ├── testes/03_testes_integridade.sql
+    └── consultas/
+        ├── 04_consultas_gerenciais.sql
+        └── 05_consultas_auditoria.sql
 ```
 
 - [DER (imagem)](diagramas/DER.png)
 - [Modelo lógico (imagem)](modelo_logico/modelo_logico.png)
 - [Scripts SQL](sql/)
-- [Dicionário de dados conceitual (PDF)](documentos/dicionario_de_dados.pdf)
-- [Diário de bordo (PDF)](documentos/DIARIO%20DE%20BORDO_000205.pdf)
+- [Normalização](docs/normalizacao.md) · [Revisão da primeira entrega](docs/revisao_primeira_entrega.md)
+- [Dicionário de dados conceitual](docs/dicionario_de_dados_conceitual.md) · [Dicionário do modelo implementado](docs/dicionario_de_dados_implementado.md)
+- [Evidências dos testes](docs/evidencias_testes.md)
+- [Diário de bordo (PDF)](docs/diario_de_bordo.pdf)
+
+### Como reproduzir
+
+Em um servidor MySQL 8.0.16+ ou MariaDB 10.2+ vazio:
+
+```bash
+bash sql/executar_tudo.sh          # usa mysql -uroot
+MYSQL_ARGS="-uusuario -p" bash sql/executar_tudo.sh
+```
