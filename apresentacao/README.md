@@ -2,7 +2,6 @@
 
 Roteiro de 20 minutos, na ordem do manual: **EXPLICAR → MOSTRAR → DEFENDER → DEMONSTRAR → PROPOR**. Cada slide tem as notas do orador com o tempo sugerido.
 
-- Apresentação online (privada até ser compartilhada pelo menu Share): https://claude.ai/artifact/RETe5PLbCrjYKzwRBRFzmW
 - Versão em PDF: `apresentacao/apresentacao.pdf` (exportada pelo menu de exportação da apresentação)
 - Fonte dos slides: `apresentacao/fonte/` (`deck.json` com o índice e `slides/*.html`, um arquivo por slide)
 
