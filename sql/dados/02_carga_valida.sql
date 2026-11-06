@@ -70,3 +70,32 @@ INSERT INTO item_orcamento (id_item, id_orcamento, id_servico, id_peca, quantida
 
 INSERT INTO pagamento (id_pagamento, id_orcamento, data_pagamento, valor, forma_pagamento, status) VALUES
 (1, 1, '2026-10-22 16:20:00', 2750.00, 'PIX', 'CONFIRMADO');
+
+-- ---------------------------------------------------------------------
+-- Complemento da massa de dados (IDs novos, sem alterar os registros acima).
+-- Permite analisar vendas em mais de um periodo, varios clientes e
+-- diferentes formas de pagamento nas consultas gerenciais e de auditoria.
+-- ---------------------------------------------------------------------
+INSERT INTO cliente (id_cliente, nome, cpf_cnpj, telefone) VALUES
+(5, 'Patricia Gomes', '55544433322', '11990000005');
+
+INSERT INTO veiculo (id_veiculo, id_cliente, placa, chassi, marca, modelo, cor, ano) VALUES
+(5, 5, 'QRS2T34', '9BWZZZ377VT555555', 'Chevrolet', 'Celta', 'Vermelho', 2012);
+
+-- OS 5 concluida em setembro/2026 (orcamento 4 aprovado e pago)
+INSERT INTO ordem_servico (id_os, id_cliente, id_veiculo, id_funcionario, data_abertura, descricao_problema, previsao_entrega, status) VALUES
+(5, 5, 5, 1, '2026-09-15 11:00:00', 'Porta dianteira amassada', '2026-09-25', 'CONCLUIDA'),
+(6, 3, 3, 3, '2026-10-30 09:00:00', 'Pintura de grade frontal', NULL, 'EM_ANDAMENTO');
+
+INSERT INTO orcamento (id_orcamento, id_os, data_orcamento, validade, status) VALUES
+(4, 5, '2026-09-16', '2026-09-23', 'APROVADO'),
+(5, 6, '2026-10-31', '2026-11-07', 'APROVADO');
+
+INSERT INTO item_orcamento (id_item, id_orcamento, id_servico, id_peca, quantidade, valor_unitario) VALUES
+(8,  4, 1, NULL, 1, 900.00),
+(9,  4, 3, NULL, 1, 350.00),
+(10, 5, 2, NULL, 1, 1200.00);
+
+INSERT INTO pagamento (id_pagamento, id_orcamento, data_pagamento, valor, forma_pagamento, status) VALUES
+(2, 4, '2026-09-25 14:00:00', 1250.00, 'CARTAO', 'CONFIRMADO'),
+(3, 5, '2026-11-02 10:30:00', 1200.00, 'DINHEIRO', 'PENDENTE');
