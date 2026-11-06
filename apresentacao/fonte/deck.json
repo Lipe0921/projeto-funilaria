@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-11-06T23:40:00Z"},
+  "lists": "css",
+  "title": "Apresentação Prime Funilaria - Grupo 04",
+  "cover": "cover",
+  "order": ["cover", "problema", "solucao", "decisao1", "decisao2", "decisao3", "demo1", "demo2", "evolucao", "fim"],
+  "sections": {
+    "s1": {"description": "Abertura e problema", "start": "cover"},
+    "s2": {"description": "Solução e decisões técnicas", "start": "solucao"},
+    "s3": {"description": "Demonstração e evidências", "start": "demo1"},
+    "s4": {"description": "Evolução e encerramento", "start": "evolucao"}
+  },
+  "faces": {
+    "space-grotesk": {"family": "Space Grotesk", "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&display=swap"},
+    "inter": {"family": "Inter", "href": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"}
+  },
+  "designSystems": []
+}

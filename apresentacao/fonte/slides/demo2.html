@@ -1,0 +1,20 @@
+<section id="demo2" data-transition="fade" style="background:#FBFBF8;color:#14213D;font-family:'Inter', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:48px">
+<p style="font-size:28px;font-weight:600;color:#B5520F;text-transform:uppercase;letter-spacing:3px">Demonstrar · consulta gerencial e auditoria</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.1">Quanto falta receber, e o banco confirma</h2>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#14213D;color:#FBFBF8;padding:48px;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;color:#F4A261">Consulta G6 · saldo em aberto</h3>
+<p style="font-size:96px;font-weight:700;line-height:1.1;font-family:'Space Grotesk', Arial, sans-serif">R$ 830,00</p>
+<p style="font-size:30px;line-height:1.4;color:#C9D3E6">Orçamento 2, da cliente Marina Duarte: aprovado, sem pagamento lançado.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#F1EFE9;padding:48px;border:1px solid #D9D5CB;border-radius:16px">
+<h3 style="font-size:32px;font-weight:600;color:#B5520F">Auditoria A3</h3>
+<p style="font-size:30px;line-height:1.4">Lista orçamentos aprovados sem pagamento. Retorna o orçamento 2, que é exatamente o saldo da consulta G6.</p>
+</div>
+</div>
+<p style="font-size:34px;line-height:1.35"><b>Decisão:</b> cobrar o saldo antes de liberar o reparo, e registrar o pagamento pelo financeiro (P03).</p>
+</div>
+<p style="font-size:28px;color:#4A5568">Consultas: sql/consultas/04 (G6) e sql/consultas/05 (A3)</p>
+<aside>Demonstrar (continuação). Esta evidência mostra que a consulta gerencial e a auditoria se complementam: a gerencial mede o saldo, e a auditoria aponta a pendência para conferência. Atenção: o valor depende da ordem de execução dos testes (o teste U1 aprova o orçamento 2). Antes da apresentação, executar 01, 02, 04 e 05 para ver o estado sem os testes.</aside>
+</section>

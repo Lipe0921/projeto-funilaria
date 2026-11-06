@@ -1,0 +1,30 @@
+<section id="decisao2" data-transition="fade" style="background:#FBFBF8;color:#14213D;font-family:'Inter', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:40px">
+<p style="font-size:28px;font-weight:600;color:#B5520F;text-transform:uppercase;letter-spacing:3px">Decisão 2 · regra de exclusividade</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.1">Cada item é um serviço ou uma peça (RN13)</h2>
+<div style="display:flex;gap:32px;align-items:center">
+<div style="flex:1;background:#14213D;color:#FBFBF8;padding:40px;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:34px;font-weight:600">Serviço</h3>
+<p style="font-size:28px;color:#C9D3E6">id_servico preenchido</p>
+</div>
+<p style="font-size:44px;font-weight:700;color:#B5520F">OU</p>
+<div style="flex:1;background:#14213D;color:#FBFBF8;padding:40px;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:34px;font-weight:600">Peça</h3>
+<p style="font-size:28px;color:#C9D3E6">id_peca preenchido</p>
+</div>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<h3 style="width:330px;font-size:32px;font-weight:600;color:#B5520F">Por que</h3>
+<p style="font-size:34px;line-height:1.35">Um CHECK exige exatamente uma das duas chaves preenchida. O banco rejeita item com as duas ou com nenhuma.</p>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<h3 style="width:330px;font-size:32px;font-weight:600;color:#B5520F">Alternativas</h3>
+<p style="font-size:34px;line-height:1.35">Duas tabelas de itens (repete a estrutura do orçamento), ou colunas sem regra (aceita item vazio).</p>
+</div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+<h3 style="width:330px;font-size:32px;font-weight:600;color:#B5520F">E se a regra mudar?</h3>
+<p style="font-size:34px;line-height:1.35">Trocar o CHECK e conferir os itens já existentes com a consulta de auditoria.</p>
+</div>
+</div>
+<aside>Defender (2 minutos desta decisão). Mostrar o DER: a linha vermelha tracejada é a RN13. Explicar que a cardinalidade (0,1) de cada lado é opcional sozinha, e a obrigação de um dos dois vem da regra. Essa decisão é verificada na demonstração (teste T07 e T08). Ver README, seção 17.1.</aside>
+</section>
